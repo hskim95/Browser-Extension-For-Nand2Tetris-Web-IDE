@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset = "utf-8" />
+  <title>PopUp</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <style>
+    html {
+      min-height: 10em;
+      min-width: 20em;
+      background: lightgrey;
+    }
+  </style>
+</head>
+<body>
+  <table>
+    <caption>기능 목록</caption>
+    <tbody>
+    <tr>
+      <td>
+        <button id="backupAll_Btn">백업</button>
+      </td>
+      <td>
+        현재까지 편집한 내용을 저장합니다.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <button id="backupCustom_Btn">부분 백업</button>
+      </td>
+      <td>
+        편집한 내용 중 원하는 항목만 선택하여 백업합니다.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <button onclick='alert("불러오기 기능을 실행했습니다. (기능 미구현)")'>불러오기</button>
+      </td>
+      <td>
+        백업한 내용을 불러옵니다.
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <script src="popup.js"></script>
+</body>
+</html>
