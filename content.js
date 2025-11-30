@@ -1,21 +1,24 @@
 // content.js
 chrome.runtime.onMessage.addListener(
     (message, sender, sendResponse) => {
-        if (message.action === "backup") {
-            const dataPackage = packStorageAsObject();
-            chrome.runtime.sendMessage({ action: "saveData", data: dataPackage});
-        }
-        else if (message.action === "restore") {
-
+        if (message.action === "getData") {
+            const dataPackage = packStorageAsObject(message.option);
+            sendResponse({ data: dataPackage });
         }
     }
 )
 
-function packStorageAsObject() {
+async function packStorageAsObject(option) {
     const data = {};
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        data[key] = localStorage.getItem(key);
+        if (option === "all") {
+            data[key] = localStorage.getItem(key);
+        }
+        /*
+        else if (option === "") {
+           // To do: filter key by specified option
+        }*/
     }
     return data;
 }

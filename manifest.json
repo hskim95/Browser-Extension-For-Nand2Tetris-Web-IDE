@@ -16,7 +16,9 @@
     "action":
     {
         "default_icon": {
-            "64": "extension64.png" // image not prepared
+            "16": "Extension16.png",
+            "32": "Extension32.png",
+            "128": "Extension128.png"
         },
         "default_title": "Backup Tool for Nand2Tetris - Save and Load your code.",
         "default_popup": "popup.html",
@@ -39,7 +41,8 @@
         "webNavigation",
         "tabs",
         "scripting",
-        "storage"
+        "storage",
+        "notifications"
     ],
     // 그 외: 필요한 것을 추가
     "host_permissions": [
