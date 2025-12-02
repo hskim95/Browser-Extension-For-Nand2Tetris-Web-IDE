@@ -33,3 +33,36 @@ document.getElementById("backupCustom_Btn").addEventListener("click",
         });
 });
 
+const checkAllProjects = document.getElementById("project all");
+const individualProjects = document.querySelectorAll('[name="project"]:not([id$="all"])');
+
+checkAllProjects.addEventListener("change",
+    () => {
+        for (checkbox of individualProjects) {
+            checkbox.checked = checkAllProjects.checked;
+        }
+});
+
+individualProjects.forEach(checkbox => {
+    checkbox.addEventListener("click", () => {
+        const allChecked = Array.from(individualProjects).every(project => project.checked);
+        checkAllProjects.checked = allChecked;
+    })
+});
+
+const checkAllExtensions = document.getElementById("extension all");
+const individualExtensions = document.querySelectorAll('[name="extension"]:not([id$="all"])');
+
+checkAllExtensions.addEventListener("change",
+    () => {
+        for (checkbox of individualExtensions) {
+            checkbox.checked = checkAllExtensions.checked;
+        }
+});
+
+individualExtensions.forEach(checkbox => {
+    checkbox.addEventListener("click", () => {
+        const allChecked = Array.from(individualExtensions).every(extension => extension.checked);
+        checkAllExtensions.checked = allChecked;
+    })
+});
