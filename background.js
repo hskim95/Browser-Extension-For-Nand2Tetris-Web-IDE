@@ -1,6 +1,12 @@
 // background.js
 const rootURL = "https://nand2tetris.github.io/web-ide/";
 
+if (chrome?.action) {
+    console.log("[DEBUG] chrome.action found: background.js");
+} else {
+    console.error("[DEBUG] chrome.action missing: background.js");
+}
+
 chrome.action.disable(); // 클릭 불가능.
 chrome.action.setBadgeText({ text: "OFF" });
 chrome.action.setBadgeBackgroundColor({ color: "red" });
@@ -27,24 +33,33 @@ function changeIcon(tabId, isON) {
 }
 
 chrome.runtime.onMessage.addListener(
-    (message, sender, sendResponse) => {
-        const [tab] = chrome.tabs.query({ active: true, currentWindow: true });
-        const tabId = tab.id;
+    (message, _sender, sendResponse) => {
+        console.log("[Debug] chrome.runtime.onMessage Event: background.js");
         if (message.action === "backup") {
-            chrome.tabs.sendMessage( // ask content.js about localStorage data
-                tabId,
-                { action: "getData", option: message.option }, // message
-                { frameId : 0 }, // main frame only
-                (response) => {
-                    chrome.storage.local.set({ backupData: response.data },
-                        () => {
-                            if (chrome.runtime.lastError) {
-                                sendResponse({ status: "error",
-                                message: chrome.runtime.lastError.message });
-                                return;
-                            }
-                            sendResponse({ status: "ok" });
-                    });
-            });
+            console.log("[Debug] get messaage (backup): background.js");
+            (async () => {
+                const tab = await chrome.tabs.query({ active: true, currentWindow: true });
+                console.log("[Debug] chrome.tabs.query result: " + tab + ": background.js");
+                const tabId = tab[0].id;
+
+                console.log("[Debug] send message (getData): background.js");
+                const responseData = await chrome.tabs.sendMessage( // ask content.js about localStorage data
+                    tabId,
+                    { action: "getData", option: message.option }, // message
+                    { frameId : 0 } // main frame only
+                );
+                chrome.storage.local.set({ backupData: responseData });
+                if (chrome.runtime.lastError) {
+                    console.error("[Debug] send Response (backup error): background.js");
+                    sendResponse({ status: "error", message: chrome.runtime.lastError.message });
+                }
+                else {
+                    console.log("[Debug] send Response (backup ok): background.js");
+                    sendResponse({ status: "ok" , message: chrome.storage.local.get(["backupData"])});
+                    console.log("[Debug] backupData: " + chrome.storage.local.get(["backupData"]));
+                }
+            })();
+            return true;
         }
+        else return false;
 });

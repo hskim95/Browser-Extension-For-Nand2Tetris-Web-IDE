@@ -1,12 +1,24 @@
 // content.js
+if (chrome?.runtime) {
+    console.log("[DEBUG] chrome.runtime found.");
+} else {
+    console.error("[DEBUG] chrome.runtime missing.");
+}
+
 chrome.runtime.onMessage.addListener(
-    (message, sender, sendResponse) => {
+    (message, _sender, sendResponse) => {
         if (message.action === "getData") {
-            const dataPackage = packStorageAsObject(message.option);
-            sendResponse({ data: dataPackage });
+            (async () => {
+                const dataPackage = await packStorageAsObject(message.option);
+                console.log("[Debug] storage data is now ready: " + dataPackage +" :content.js");
+                console.log("[Debug] send Response to background.js: content.js");
+                sendResponse(dataPackage);
+            })();
+            return true;
         }
-    }
-)
+        console.log("[Debug] refuse Response to background.js: content.js");
+        return false;
+});
 
 async function packStorageAsObject(option) {
     const data = {};
@@ -20,5 +32,6 @@ async function packStorageAsObject(option) {
            // To do: filter key by specified option
         }*/
     }
-    return data;
+    console.log("[Debug] data packing result: " + data);
+    return Promise.resolve(data);
 }
