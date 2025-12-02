@@ -7,7 +7,7 @@
   <style>
     html {
       min-height: 10em;
-      min-width: 20em;
+      min-width: 27em;
       background: lightgrey;
     }
   </style>
@@ -16,100 +16,88 @@
   <table>
     <caption>기능 목록</caption>
     <tbody>
-    <tr>
-      <td>
-        <button id="backupAll_Btn">백업</button>
-      </td>
-      <td>
-        현재까지 편집한 내용을 저장합니다.
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div><button id="backupCustom_Btn">부분 백업</button></div>
+      <tr>
+        <td>
+          <button id="backupAll_Btn">백업</button>
+        </td>
+        <td>
+          현재까지 편집한 내용을 저장합니다.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <button id="backupCustom_Btn">부분 백업</button>
+        </td>
+        <td>
+          편집한 내용 중 원하는 항목만 선택하여 백업합니다.<br>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <fieldset>
+            <legend>Project</legend>
 
-      </td>
-      <td>
-        편집한 내용 중 원하는 항목만 선택하여 백업합니다.<br>
-        <fieldset>
-          <legend>Project</legend>
-          <label for="project all">모두
-            <input type="checkbox" name="project" id="project all" />
-          </label>
-          <t>
-          <label for="project 1">1
-            <input type="checkbox" name="project" id="project 1" />
-          </label>
-          <t>
-          <label for="project 2">2
-            <input type="checkbox" name="project" id="project 2" />
-          </label>
-          <t>
-          <label for="project 3">3
-            <input type="checkbox" name="project" id="project 3" />
-          </label>
-          <t>
-          <label for="project 4">4
-            <input type="checkbox" name="project" id="project 4" />
-          </label>
-          <t>
-          <label for="project 5">5
-            <input type="checkbox" name="project" id="project 5" />
-          </label>
-          <t>
-          <label for="project 6">6
-            <input type="checkbox" name="project" id="project 6" />
-          </label>
-          <t>
-          <label for="project 7">7
-              <input type="checkbox" name="project" id="project 7" />
-          </label>
-          <t>
-          <label for="project 8">8
-              <input type="checkbox" name="project" id="project 8" />
-          </label>
-        </fieldset>
-        <fieldset>
-          <legend>Extension</legend>
-          <label for="extension all">모두
-            <input type="checkbox" name="extension" id="extension all" />
-          </label>
-          <t>
-          <label for=".hdl">.hdl
-            <input type="checkbox" name="extension" id="extension hdl" />
-          </label>
-          <t>
-          <label for=".asm">.asm
-            <input type="checkbox" name="extension" id="extension asm" />
-          </label>
-          <t>
-          <label for=".hack">.hack
-            <input type="checkbox" name="extension" id="extension hack" />
-          </label>
-          <t>
-          <label for=".vm">.vm
-            <input type="checkbox" name="extension" id="extension vm" />
-          </label>
-          <t>
-          <label for=".cmp">.cmp
-            <input type="checkbox" name="extension" id="extension cmp" />
-          </label>
-          <t>
-          <label for=".tst">.tst
-            <input type="checkbox" name="extension" id="extension tst" />
-          </label>
-          <t>
-        </fieldset>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <button id="load_Btn">불러오기</button>
-      </td>
-      <td>
-        백업한 내용을 불러옵니다.
-      </td>
-    </tr>
+            <label for="project all">[모두
+              <input type="checkbox" name="project" id="project all" />]
+            </label>
+            <br>
+            <label for="project 1">[1<input type="checkbox" name="project" id="project 1" />]
+            </label>
+            <label for="project 2">[2
+              <input type="checkbox" name="project" id="project 2" />]
+            </label>
+            <label for="project 3">[3
+              <input type="checkbox" name="project" id="project 3" />]
+            </label>
+            <label for="project 4">[4<input type="checkbox" name="project" id="project 4" />]
+            </label>
+            <label for="project 5">[5<input type="checkbox" name="project" id="project 5" />]
+            </label>
+            <label for="project 6">[6
+              <input type="checkbox" name="project" id="project 6" />]
+            </label>
+            <label for="project 7">[7
+                <input type="checkbox" name="project" id="project 7" />]
+            </label>
+            <label for="project 8">[8
+                <input type="checkbox" name="project" id="project 8" />]
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Extension</legend>
+            <label for="extension all">[모두
+              <input type="checkbox" name="extension" id="extension all" />]
+            </label>
+            <br>
+            <label for=".hdl">[.hdl
+              <input type="checkbox" name="extension" id="extension hdl" />]
+            </label>
+            <label for=".asm">[.asm
+              <input type="checkbox" name="extension" id="extension asm" />]
+            </label>
+            <label for=".hack">[.hack
+              <input type="checkbox" name="extension" id="extension hack" />]
+            </label>
+            <label for=".vm">[.vm
+              <input type="checkbox" name="extension" id="extension vm" />]
+            </label>
+            <label for=".cmp">[.cmp
+              <input type="checkbox" name="extension" id="extension cmp" />]
+            </label>
+            <label for=".tst">[.tst
+              <input type="checkbox" name="extension" id="extension tst" />]
+            </label>
+          </fieldset>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <button id="load_Btn">불러오기</button>
+        </td>
+        <td>
+          백업한 내용을 불러옵니다.
+        </td>
+      </tr>
     </tbody>
   </table>
   <script src="popup.js"></script>
