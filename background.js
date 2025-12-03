@@ -32,6 +32,8 @@ function changeIcon(tabId, isON) {
     }
 }
 
+let cachedKeys = null;
+
 chrome.runtime.onMessage.addListener(
     (message, _sender, sendResponse) => {
         console.log("[Debug] chrome.runtime.onMessage Event: background.js");
@@ -59,7 +61,73 @@ chrome.runtime.onMessage.addListener(
                     console.log("[Debug] backupData: " + chrome.storage.local.get(["backupData"]));
                 }
             })();
-            return true;
+        }
+        else if (message.action === "load backuplist") {
+            console.log("[Debug] get messaage (load backuplist): background.js");
+            (async () => {
+                try {
+                    if (!cachedKeys) { // no cached Data exist
+                        const allKeys = await chrome.storage.local.getKeys();
+                        if (allKeys.length === 0) {
+                            cachedKeys = allKeys;
+                            sendResponse({ status: "no Backup" });
+                        }
+                        else {
+                            cachedKeys = allKeys.filter(key => key.startsWith("backupData"));
+                        }
+                    }
+                    const response = cachedKeys.length === 0 ?
+                    { status: "no Backup" } :
+                    { status: "found Backup", message: cachedKeys };
+                    sendResponse(response);
+                }
+                catch (e) {
+                    console.error("catch error(load): background.js");
+                    sendResponse({ status: "error" });
+                }
+            })();
+        }
+        else if (message.action === "load to browser") {
+            console.log("[Debug] get messaage (load to browser): background.js");
+            const backupName = message.backupName;
+            (async () => {
+                try {
+                    const load = chrome.storage.local.get(backupName);
+                    const getTab = chrome.tabs.query({ active: true, currentWindow: true });
+
+                    const [{[backupName] : loaded}, tab] = await Promise.all([load, getTab]);
+                    console.log("[Debug] chrome.storage.local.get result: " + loaded + ": background.js");
+
+                    console.log("[Debug] chrome.tabs.query result: " + tab + ": background.js");
+                    const tabId = tab[0].id;
+
+                    console.log("[Debug] send message (getData): background.js");
+                    const response = await chrome.tabs.sendMessage(
+                        tabId,
+                        { action: "override", data: loaded }, // message
+                        { frameId : 0 } // main frame only
+                    );
+                    sendResponse({ status: response });
+                }
+                catch(e) {
+                    console.error(e);
+                }
+            })();
         }
         else return false;
+        return true; // if passed condition, return true
 });
+
+chrome.storage.local.onChanged.addListener((_changes) => {
+    (async () => {
+        cachedKeys = await storage.local.getKeys();
+        const response = await chrome.runtime.sendMessage({ action: "update", message: cachedKeys});
+        if (response) {
+            console.log("Popup refreshed backuplist: " + response + ": background.js");
+        }
+        else {
+            console.log("popup not responding. Maybe popup is closed.: background.js");
+        }
+        return true;
+    })();
+})

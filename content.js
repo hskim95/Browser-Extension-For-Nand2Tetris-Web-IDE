@@ -16,8 +16,20 @@ chrome.runtime.onMessage.addListener(
             })();
             return true;
         }
+        else if (message.action === "override") {
+            (async () => {
+                const loadedData = message.data;
+                for (let [key, value] of Object.entries(loadedData)) {
+                    localStorage.setItem(key, value);
+                }
+                console.log("[Debug] data loading finished: content.js");
+                sendResponse({ status: "loading ok" });
+            })();
+            return true;
+        }
         console.log("[Debug] refuse Response to background.js: content.js");
         return false;
+
 });
 
 async function packStorageAsObject(option) {
