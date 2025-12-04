@@ -1,20 +1,10 @@
 {
-    // 필수
-    "manifest_version": 3, // 고정
+    "manifest_version": 3,
     "name": "Backup Tool for Nand2Tetris",
     "version": "1.0.0",
-
-    // 추천
     "description": "이 확장앱은 Nand2Tetris Web-IDE 사용 중 데이터 유실을 방지하기 위한 목적의 백업 및 복원 기능을 지원하기 위해 개발되었습니다.",
-    "icons":
-    {
-
-    },
-    // "default_locale": "ko",
-
-    // 선택: 둘 중 하나만 설정할 수 있음
-    "action":
-    {
+    "icons": {},
+    "action": {
         "default_icon": {
             "16": "Extension16.png",
             "32": "Extension32.png",
@@ -23,20 +13,21 @@
         "default_title": "Backup Tool for Nand2Tetris - Save and Load your code.",
         "default_popup": "popup.html",
         "default_state": "disabled"
-    }, // 툴바에 버튼 추가
-
+    },
     "background": {
         "service_worker": "background.js"
     },
     "content_scripts": [
         {
-            "matches": ["https://nand2tetris.github.io/web-ide/*"],
-            "js": ["content.js"],
+            "matches": [
+                "https://nand2tetris.github.io/web-ide/*"
+            ],
+            "js": [
+                "content.js"
+            ],
             "run_at": "document_idle"
         }
     ],
-
-    // 권한
     "permissions": [
         "webNavigation",
         "tabs",
@@ -44,7 +35,6 @@
         "storage",
         "notifications"
     ],
-    // 그 외: 필요한 것을 추가
     "host_permissions": [
         "https://nand2tetris.github.io/web-ide/*"
     ]

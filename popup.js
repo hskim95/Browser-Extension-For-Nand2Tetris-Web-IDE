@@ -1,5 +1,5 @@
 // popup.js
-
+/// <reference path="/usr/lib/node_modules/chrome-types/index.d.ts" />
 
 document.getElementById("backupAll_Btn").addEventListener("click",
     async () => {
@@ -32,6 +32,12 @@ document.getElementById("backupCustom_Btn").addEventListener("click",
             type: "basic"
         });
 });
+
+const projectOptionGroup = document.querySelectorAll('input[name="project"]:checked');
+
+async function collectOptions() {
+
+}
 
 const backupCombobox = document.getElementById("backupCollection");
 

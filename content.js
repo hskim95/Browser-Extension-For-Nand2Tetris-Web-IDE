@@ -1,4 +1,6 @@
 // content.js
+/// <reference path="/usr/lib/node_modules/chrome-types/index.d.ts" />
+
 if (chrome?.runtime) {
     console.log("[DEBUG] chrome.runtime found.");
 } else {

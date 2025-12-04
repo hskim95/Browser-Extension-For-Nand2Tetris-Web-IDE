@@ -1,4 +1,6 @@
 // background.js
+/// <reference path="/usr/lib/node_modules/chrome-types/index.d.ts" />
+
 const rootURL = "https://nand2tetris.github.io/web-ide/";
 
 if (chrome?.action) {
@@ -7,6 +9,7 @@ if (chrome?.action) {
     console.error("[DEBUG] chrome.action missing: background.js");
 }
 
+// to do: 리로드 발생 시 이미 사이트 접속 상태면 바로 활성화하도록 수정
 chrome.action.disable(); // 클릭 불가능.
 chrome.action.setBadgeText({ text: "OFF" });
 chrome.action.setBadgeBackgroundColor({ color: "red" });
