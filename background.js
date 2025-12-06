@@ -19,7 +19,7 @@ chrome.runtime.onInstalled.addListener((_details) => {
         else
         {
             console.log("found valid domain tabs: " + currentTabs.toString() + ": background.js");
-            updateTabsIcon(currentTabs);
+            await updateTabsIcon(currentTabs);
         }
     })();
 });
@@ -32,8 +32,8 @@ async function cacheData() {
         cachedBackup[entriesArray[i][0]] = entriesArray[i][1];
     }
 }
-
-function updateTabsIcon(tabs) {
+// change in parallel-processing manner
+async function updateTabsIcon(tabs) {
     for (const tab of tabs) {
         updateTabIcon(tab.id);
     }
