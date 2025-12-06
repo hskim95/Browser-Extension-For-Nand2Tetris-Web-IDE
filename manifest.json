@@ -24,13 +24,10 @@
             ],
             "js": [
                 "content.js"
-            ],
-            "run_at": "document_idle"
+            ]
         }
     ],
     "permissions": [
-        "webNavigation",
-        "tabs",
         "scripting",
         "storage",
         "notifications"

@@ -1,7 +1,7 @@
 // popup.js
 /// <reference path="/usr/lib/node_modules/chrome-types/index.d.ts" />
 
-document.getElementById("backupAll_Btn").addEventListener("click",
+document.querySelector('#backupAll_Btn[data-origin="static"]').addEventListener("click",
     async () => {
         // To Do: read all local storage data(key:value pairs)
         // and save to extension storage
@@ -16,9 +16,15 @@ document.getElementById("backupAll_Btn").addEventListener("click",
             title: "Job finished! (Total Backup)",
             type: "basic"
         });
+        if (response.status === "ok") {
+            await updateBackupList();
+        }
+
 });
 
-document.getElementById("backupCustom_Btn").addEventListener("click",
+let updateFlag = false;
+
+document.querySelector('button#backupCustom_Btn[data-origin="static"]').addEventListener("click",
     async () => {
         console.log("[Debug] send message (backup, custom): popup.js");
 
@@ -31,45 +37,43 @@ document.getElementById("backupCustom_Btn").addEventListener("click",
             title: "Job finished! (Custom Backup)",
             type: "basic"
         });
+        if (response.status === "ok") {
+            await updateBackupList();
+        }
 });
 
-const projectOptionGroup = document.querySelectorAll('input[name="project"]:checked');
+const projectOptionGroup = document.querySelectorAll('input[type="checkbox"][name="project"][data-origin="static"]:checked');
 
 async function collectOptions() {
 
 }
 
-const backupCombobox = document.getElementById("backupCollection");
+const backupCombobox = document.querySelector('select#backupCollection[data-origin="static"]');
 
 
-document.addEventListener("DOMContentLoaded", listBackup);
+document.addEventListener("DOMContentLoaded", updateBackupList);
 
-async function listBackup() {
+async function updateBackupList() {
     console.log("[Debug] searching backup data: popup.js");
     const response = await chrome.runtime.sendMessage({action: "load backuplist"});
     console.log("[Debug] found backup data: " + response.status + " : popup.js");
-    if (response.status === "no Backup") {
-        chrome.notifications.create({
-            iconUrl: "Extension128.png",
-            message: "Result: " + response.status,
-            title: "Loading backup...",
-            type: "basic"
-        });
-    }
-    else if (response.status === "error") {
+    if (response.status === "error") {
         return false;
     }
     else {
-        const keyList = response.message;
-        const comboboxString = makeCombobox(keyList);
-        const template = document.createElement("template");
-        template.innerHTML = comboboxString;
-        backupCombobox.appendChild(template.content);
+        if (updateFlag) {
+            console.log("[Debug] Update channel is busy...: popup.js@load backuplist");
+        }
+        else {
+            console.log("[Debug] not busy right now. start update: popup.js@self");
+            const keyList = response.message;
+            await appendBackupList(keyList);
+        }
     }
     return true;
 }
 
-document.getElementById("load_Btn").addEventListener("click",
+document.querySelector('button#load_Btn[data-origin="static"]').addEventListener("click",
     () => {
         const choice = backupCombobox.value;
         if (choice != "") {
@@ -99,8 +103,8 @@ function makeCombobox(stringArray) {
     return htmlString;
 }
 
-const checkAllProjects = document.getElementById("project all");
-const individualProjects = document.querySelectorAll('[name="project"]:not([id$="all"])');
+const checkAllProjects = document.getElementById("project-all");
+const individualProjects = document.querySelectorAll('input[type="checkbox"][name="project"]:not([id$="all"])');
 
 checkAllProjects.addEventListener("change",
     () => {
@@ -116,7 +120,7 @@ individualProjects.forEach(checkbox => {
     })
 });
 
-const checkAllExtensions = document.getElementById("extension all");
+const checkAllExtensions = document.getElementById("extension-all");
 const individualExtensions = document.querySelectorAll('[name="extension"]:not([id$="all"])');
 
 checkAllExtensions.addEventListener("change",
@@ -138,18 +142,35 @@ chrome.runtime.onMessage.addListener(
         console.log("[Debug] chrome.runtime.onMessage Event: popup.js");
         if (message.action === "update") {
             console.log("[Debug] get message (update): popup.js");
-            (async () => {
-                const newKeys = message.message;
-                const comboboxString = makeCombobox(newKeys);
-                const template = document.createElement("template");
-                template.innerHTML = comboboxString;
-                while (backupCombobox.childElementCount > 1) {
-                    backupCombobox.removeChild[backupCombobox.childElementCount - 1];
-                }
-                backupCombobox.appendChild(template.content);
-                sendResponse({ status: "update ok"});
-            })();
+            if (updateFlag) {
+                console.log("[Debug] Update channel is busy...: popup.js@update");
+                sendResponse({ status: "busy" });
+            }
+            else {
+                console.log("[Debug] not busy right now. start update: popup.js@forced");
+                const keyList = message.message;
+                (async () => {
+                    const appendResult = await appendBackupList(keyList);
+                    sendResponse({ status: "update " + appendResult });
+                })();
+            }
             return true;
         }
         else return;
 });
+
+async function appendBackupList(keyList) {
+    updateFlag = true;
+    const comboboxString = makeCombobox(keyList);
+    const template = document.createElement("template");
+    template.innerHTML = comboboxString;
+    while (backupCombobox.childElementCount > 0) {
+        backupCombobox.removeChild(backupCombobox.lastChild);
+        console.log("removed child in combobox. child left: " + backupCombobox.childElementCount + ": popup.js");
+    }
+    console.log("appendChild called from update action: popup.js");
+    backupCombobox.appendChild(template.content);
+    updateFlag = false;
+    return true;
+}
+

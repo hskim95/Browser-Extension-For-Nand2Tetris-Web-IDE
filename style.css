@@ -1,3 +1,7 @@
+* {
+    white-space: nowrap;
+}
+
 table {
     table-layout: fixed;
     width: stretch;

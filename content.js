@@ -1,11 +1,7 @@
 // content.js
 /// <reference path="/usr/lib/node_modules/chrome-types/index.d.ts" />
 
-if (chrome?.runtime) {
-    console.log("[DEBUG] chrome.runtime found.");
-} else {
-    console.error("[DEBUG] chrome.runtime missing.");
-}
+console.log("[DEBUG] injected me: content.js");
 
 chrome.runtime.onMessage.addListener(
     (message, _sender, sendResponse) => {
@@ -27,6 +23,10 @@ chrome.runtime.onMessage.addListener(
                 console.log("[Debug] data loading finished: content.js");
                 sendResponse({ status: "loading ok" });
             })();
+            return true;
+        }
+        else if (message.action === "ping test") {
+            sendResponse({ status: "I am alive" });
             return true;
         }
         console.log("[Debug] refuse Response to background.js: content.js");
