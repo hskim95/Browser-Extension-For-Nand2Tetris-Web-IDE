@@ -50,7 +50,6 @@ async function collectOptions() {
 
 const backupCombobox = document.querySelector('select#backupCollection[data-origin="static"]');
 
-
 document.addEventListener("DOMContentLoaded", updateBackupList);
 
 async function updateBackupList() {
@@ -73,6 +72,76 @@ async function updateBackupList() {
     return true;
 }
 
+const ProjectNumber = Object.freeze({
+    PROJECT_MIN: 1,
+    PROJECT_MAX: 8
+});
+
+const FileExtensions = Object.freeze([
+    ".hdl",
+    ".asm",
+    ".hack",
+    ".vm",
+    ".cmp",
+    ".txt"
+]);
+
+document.addEventListener("DOMContentLoaded", addProjectCheckbox);
+
+const projectParent = document.querySelector('fieldset#project-parent');
+
+let unitProjectList;
+
+function addProjectCheckbox() {
+    const partialString = [];
+    for (let i = ProjectNumber.PROJECT_MIN; i <= ProjectNumber.PROJECT_MAX; i++) {
+        const fixedIndex = i;
+        partialString.push('<label for="project-' + fixedIndex + '">[' + fixedIndex +
+        '<input type="checkbox" name="project" data-origin="injected" id="project-' + fixedIndex + '" />]</label>');
+    }
+    const contentString = partialString.join("");
+    injectDocumentFragment(contentString, projectParent);
+    unitProjectList = document.querySelectorAll('input[type="checkbox"][name="project"][data-origin="injected"]');
+    checkAllProjects.addEventListener("change", () => {
+        unitProjectList.forEach((checkbox) => checkbox.checked = checkAllProjects.checked);
+    })
+    unitProjectList.forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+            const allChecked = Array.from(unitProjectList).every(project => project.checked);
+            checkAllProjects.checked = allChecked;
+        });
+    });
+}
+
+document.addEventListener("DOMContentLoaded", addExtensionCheckbox);
+
+const extensionParent = document.querySelector('fieldset#extension-parent');
+
+let unitExtensionList;
+
+function addExtensionCheckbox() {
+    const partialString = [];
+    for (let i = 0; i < FileExtensions.length; i++) {
+        const fixedIndex = i;
+        partialString.push('<label for="extension-' + fixedIndex + '">['
+        + FileExtensions[i] +
+        '<input type="checkbox" name="extension" data-origin="injected" id="extension-'
+        + fixedIndex + '" />]</label>');
+    }
+    const contentString = partialString.join("");
+    injectDocumentFragment(contentString, extensionParent);
+    unitExtensionList = document.querySelectorAll('input[type="checkbox"][name="extension"][data-origin="injected"]');
+    checkAllExtensions.addEventListener("change", () => {
+        unitExtensionList.forEach((checkbox) => checkbox.checked = checkAllExtensions.checked);
+    });
+    unitExtensionList.forEach(checkbox => {
+        checkbox.addEventListener("change", () => {
+            const allChecked = Array.from(unitExtensionList).every(project => project.checked);
+            checkAllExtensions.checked = allChecked;
+        });
+    });
+}
+
 document.querySelector('button#load_Btn[data-origin="static"]').addEventListener("click",
     () => {
         const choice = backupCombobox.value;
@@ -93,32 +162,7 @@ document.querySelector('button#load_Btn[data-origin="static"]').addEventListener
         return true;
 });
 
-function makeCombobox(stringArray) {
-    const partialString = [];
-    partialString.push('<option value="" disabled selected hidden>...</option>');
-    for (let i = 0; i < stringArray.length; i++) {
-        partialString.push('<option value="' + stringArray[i] +'">' + stringArray[i] +"</option>");
-    }
-    const htmlString = partialString.join("");
-    return htmlString;
-}
-
 const checkAllProjects = document.getElementById("project-all");
-const individualProjects = document.querySelectorAll('input[type="checkbox"][name="project"]:not([id$="all"])');
-
-checkAllProjects.addEventListener("change",
-    () => {
-        for (checkbox of individualProjects) {
-            checkbox.checked = checkAllProjects.checked;
-        }
-});
-
-individualProjects.forEach(checkbox => {
-    checkbox.addEventListener("click", () => {
-        const allChecked = Array.from(individualProjects).every(project => project.checked);
-        checkAllProjects.checked = allChecked;
-    })
-});
 
 const checkAllExtensions = document.getElementById("extension-all");
 const individualExtensions = document.querySelectorAll('[name="extension"]:not([id$="all"])');
@@ -162,15 +206,28 @@ chrome.runtime.onMessage.addListener(
 async function appendBackupList(keyList) {
     updateFlag = true;
     const comboboxString = makeCombobox(keyList);
-    const template = document.createElement("template");
-    template.innerHTML = comboboxString;
     while (backupCombobox.childElementCount > 0) {
         backupCombobox.removeChild(backupCombobox.lastChild);
         console.log("removed child in combobox. child left: " + backupCombobox.childElementCount + ": popup.js");
     }
-    console.log("appendChild called from update action: popup.js");
-    backupCombobox.appendChild(template.content);
+    injectDocumentFragment(comboboxString, backupCombobox);
     updateFlag = false;
     return true;
 }
 
+function injectDocumentFragment(htmlString, parent) {
+    const template = document.createElement("template");
+    template.innerHTML = htmlString;
+    console.log("appendChild called from update action: popup.js");
+    parent.appendChild(template.content);
+}
+
+function makeCombobox(stringArray) {
+    const partialString = [];
+    partialString.push('<option value="" disabled selected hidden>...</option>');
+    for (let i = 0; i < stringArray.length; i++) {
+        partialString.push('<option value="' + stringArray[i] +'">' + stringArray[i] +"</option>");
+    }
+    const htmlString = partialString.join("");
+    return htmlString;
+}

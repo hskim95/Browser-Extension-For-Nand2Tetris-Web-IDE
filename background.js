@@ -12,7 +12,7 @@ chrome.runtime.onInstalled.addListener((_details) => {
     (async () => {
         await cacheData();
 
-        const currentTabs = await chrome.tabs.query({ url: rootURL + "*" });
+        const currentTabs = await chrome.tabs.query({ });
         if (!currentTabs.length) {
             console.log("[Debug] found no active tabs: background.js");
         }
@@ -24,6 +24,12 @@ chrome.runtime.onInstalled.addListener((_details) => {
     })();
 });
 
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === "complete") {
+        (async () => await updateTabIcon(tabId))();
+    }
+});
+
 async function cacheData() {
     const getLocalStorage = await chrome.storage.local.get(null);
     const entriesArray = Object.entries(getLocalStorage);
@@ -32,11 +38,12 @@ async function cacheData() {
         cachedBackup[entriesArray[i][0]] = entriesArray[i][1];
     }
 }
+
 // change in parallel-processing manner
 async function updateTabsIcon(tabs) {
-    for (const tab of tabs) {
-        updateTabIcon(tab.id);
-    }
+    //** @type {Array} */
+    const tasks = tabs.map(async (tab) => await updateTabIcon(tab.id));
+    return Promise.allSettled(tasks);
 }
 
 async function updateTabIcon(tabId) {
@@ -208,7 +215,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
         })();
         return true;
     }
-})
+});
+
 async function notifyUpdate() {
     const keyList = Object.keys(cachedBackup);
     try {
