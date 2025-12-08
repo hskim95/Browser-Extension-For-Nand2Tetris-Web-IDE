@@ -18,7 +18,7 @@ document.getElementById("backupAll_Btn").addEventListener("click",
         });
 });
 
-document.getElementById("backupCustom_Btn").addEventListener("click",
+document.getElementById("backupSelected_Btn").addEventListener("click",
     async () => {
         console.log("[Debug] send message (backup, custom): popup.js");
 
