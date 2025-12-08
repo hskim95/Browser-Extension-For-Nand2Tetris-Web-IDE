@@ -155,7 +155,7 @@ function injectDocumentFragment(htmlString, parent) {
 
 function makeComboboxHTMLString(stringArray) {
     const partialString = [];
-    partialString.push('<option value="" disabled selected hidden>...</option>');
+    partialString.push('<option value="" disabled selected hidden>선택하세요...</option>');
     for (let i = 0; i < stringArray.length; i++) {
         partialString.push('<option value="' + stringArray[i] +'">' + stringArray[i] +"</option>");
     }

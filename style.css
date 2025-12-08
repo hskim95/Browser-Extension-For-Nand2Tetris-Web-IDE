@@ -17,6 +17,11 @@ tbody {
     border-collapse: collapse;
 }
 
+table tr {
+    border-left: 5px;
+    border-right: 5px;
+}
+
 table tr:nth-of-type(1) {
     border-top: none;
 }
@@ -27,18 +32,29 @@ table tr:nth-last-of-type(1) {
 
 table td {
     vertical-align: middle;
-    padding: 6px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 6px;
+    padding-right: 6px;
     letter-spacing: 1px;
     border-collapse: collapse;
 }
 
 table td:nth-of-type(1) {
-    width: 25%;
+    width: 20%;
     text-align: center;
+    padding-right: 1px;
 }
 
 table td:nth-of-type(2) {
-    width: 75%;
+    width: 80%;
+    padding-left: 1px;
+}
+
+table td[colspan="2"] {
+    padding-top: 0px;
+    padding-left: 6px;
+    padding-right: 6px;
 }
 
 caption {
@@ -47,7 +63,7 @@ caption {
 }
 
 button {
-    width: fit-content;
+    width: 90%;
     height: fit-content;
 }
 
@@ -60,4 +76,8 @@ input[type="checkbox"] {
     vertical-align: middle;
     margin-left: 1px;
     margin-right: 1px;
+}
+
+fieldset {
+    margin: 3px;
 }
