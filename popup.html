@@ -14,39 +14,43 @@
 </head>
 <body>
   <table>
-    <caption>기능 목록</caption>
+    <caption>__MSG_caption__</caption>
     <tbody>
       <tr>
         <td>
-          <button id="backupAll_Btn" data-origin="static">백업</button>
+          <button id="backupAll_Btn" data-origin="static">__MSG_buttonName1__</button>
         </td>
-        <td>
-          현재까지 편집한 내용을 모두 저장합니다.
+        <td id="buttonDescription1" data-origin="static">
+          __MSG_buttonDescription1__
         </td>
       </tr>
     </tbody>
     <tbody>
       <tr>
         <td>
-          <button id="backupSelected_Btn" data-origin="static">선택 백업</button>
+          <button id="backupSelected_Btn" data-origin="static">__MSG_buttonName2__</button>
         </td>
-        <td>
-          편집한 내용 중 원하는 항목만 선택하여 백업합니다.<br>
+        <td id="buttonDescription2" data-origin="static">
+          __MSG_buttonDescription2__<br>
         </td>
       </tr>
       <tr>
         <td colspan="2">
           <fieldset id="project-parent">
-            <legend>Project</legend>
-            <label for="project-all">[모두
+            <legend id="project-legend" data-origin="static">
+              __MSG_localization_Project__
+            </legend>
+            <label for="project-all" id="allProject-label" data-origin="static">[__MSG_localization_All__
               <input type="checkbox" name="project" id="project-all" data-origin="static"/>]
-            </label><br>
+            </label>
+            <div class="break"></div>
           </fieldset>
           <fieldset id="extension-parent">
-            <legend>Extension</legend>
-            <label for="extension-all">[모두
+            <legend id="extension-legend" data-origin="static">__MSG_localization_FileExtension__</legend>
+            <label for="extension-all" id="allExtension-label" data-origin="static">[__MSG_localization_All__
               <input type="checkbox" name="extension" id="extension-all" data-origin="static" />]
-            </label><br>
+            </label>
+            <div class="break"></div>
           </fieldset>
         </td>
       </tr>
@@ -54,16 +58,16 @@
     <tbody>
       <tr>
         <td>
-          <button id="load_Btn" data-origin="static">불러오기</button>
+          <button id="load_Btn" data-origin="static">__MSG_buttonName3__</button>
         </td>
-        <td>
-          백업한 내용을 불러옵니다.
+        <td id="buttonDescription3" data-origin="static">
+          __MSG_buttonDescription3__
         </td>
       </tr>
       <tr>
         <td colspan="2">
-          <label for="backupCollection">Choose a backup to load:</label>
-          <select name="backupCollection" id="backupCollection" data-origin="static"></select>
+          <label for="backupCombobox" id="backupCombobox-label" data-origin="static">__MSG_comboboxDescription__</label>
+          <select name="backupCombobox" id="backupCombobox" data-origin="static"></select>
         </td>
       </tr>
     </tbody>

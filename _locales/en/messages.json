@@ -1,0 +1,102 @@
+{
+    "name": {
+        "message": "Backup Tool for Nand2Tetris",
+        "description": "Name for this extension"
+    },
+    "description": {
+        "message": "This browser extension provides additional backup & loading functions compatible with Nand to Tetris IDE(web-IDE).",
+        "description": "Explain the purpose of this extension"
+    },
+    "title": {
+        "message": "Backup Tool for Nand2Tetris - Save and Load your code.",
+        "description": "Shortened explanation; shown while hovering the icon."
+    },
+    "caption": {
+        "message": "Function List",
+        "description": "Caption for table in popup page."
+    },
+    "buttonName1": {
+        "message": "Backup"
+    },
+    "buttonName2": {
+        "message": "Custom backup"
+    },
+    "buttonName3": {
+        "message": "Load to browser"
+    },
+    "buttonDescription1": {
+        "message": "Backup the whole contents."
+    },
+    "buttonDescription2": {
+        "message": "Backup specified ones among the contents."
+    },
+    "buttonDescription3": {
+        "message": "Select a backup data and load to browser. Reload browser to apply changes."
+    },
+    "localization_All": {
+        "message": "All"
+    },
+    "localization_Project": {
+        "message": "Project"
+    },
+    "localization_FileExtension": {
+        "message": "File Extension"
+    },
+    "refuseTitle": {
+        "message": "Job Refused"
+    },
+    "refuseDetail": {
+        "message": "Invalid request."
+    },
+    "notificationTitle1": {
+        "message": "$ENDING_COMMENT_OF_JOB$! ($type_of_job$)",
+        "description": "Title of notification message. (backup all)",
+        "placeholders": {
+            "ending_comment_of_job": {
+                "content": "Job finished"
+            },
+            "type_of_job": {
+                "content": "Backup-ALL"
+            }
+        }
+    },
+    "notificationTitle2": {
+        "message": "$ending_comment_of_job$! ($type_of_job$)",
+        "description": "Title of notification message. (backup selected)",
+        "placeholders": {
+            "ending_comment_of_job": {
+                "content": "Job finished"
+            },
+            "type_of_job": {
+                "content": "Backup-SELECTED"
+            }
+        }
+    },
+    "notificationTitle3": {
+        "message": "$ending_comment_of_job$",
+        "description": "Title of notification message. (load to browser)",
+        "placeholders": {
+            "ending_comment_of_job": {
+                "content": "Loaded backup data."
+            }
+        }
+    },
+    "notificationResultHeading1": {
+        "message": "Result: ",
+        "description": "Opening ment before job status"
+    },
+    "notificationResultHeading2": {
+        "message": "Saved name: ",
+        "description": "Opening ment before backup name"
+    },
+    "comboboxDescription": {
+        "message": "Choose a backup to load: ",
+        "description": "guide message for loading combobox"
+    },
+    "css_td1_width": {
+        "message": "31%"
+    },
+    "css_button_font_size": {
+        "message": "3vw"
+    }
+}

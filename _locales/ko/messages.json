@@ -1,0 +1,102 @@
+{
+    "name": {
+        "message": "Nand2Tetris 백업 도구",
+        "description": "Name for this extension"
+    },
+    "description": {
+        "message": "이 확장앱은 Nand to Tetris 온라인 통합개발환경(web-IDE)에서 호환되는 추가적인 백업 & 복원 기능을 제공합니다.",
+        "description": "Explain the purpose of this extension"
+    },
+    "title": {
+        "message": "Nand2Tetris 백업 도구 - 작성한 코드를 저장하고 불러옵니다.",
+        "description": "Shortened explanation; shown while hovering the icon."
+    },
+    "caption": {
+        "message": "기능 목록",
+        "description": "팝업 내부 표의 캡션입니다."
+    },
+    "buttonName1": {
+        "message": "백업"
+    },
+    "buttonName2": {
+        "message": "선택 백업"
+    },
+    "buttonName3": {
+        "message": "불러오기"
+    },
+    "buttonDescription1": {
+        "message": "지금까지 편집한 내용을 저장합니다."
+    },
+    "buttonDescription2": {
+        "message": "편집한 내용 중 일부만 선택하여 저장합니다."
+    },
+    "buttonDescription3": {
+        "message": "기존에 저장된 백업 데이터 중 하나를 선택하여 브라우저로 불러옵니다. 불러온 내용을 적용하려면 브라우저 새로고침이 필요합니다."
+    },
+    "localization_All": {
+        "message": "모두"
+    },
+    "localization_Project": {
+        "message": "프로젝트"
+    },
+    "localization_FileExtension": {
+        "message": "확장자"
+    },
+    "refuseTitle": {
+        "message": "작업 거부됨"
+    },
+    "refuseDetail": {
+        "message": "유효하지 않은 작업입니다."
+    },
+    "notificationTitle1": {
+        "message": "$ending_comment_of_job$! ($type_of_job$)",
+        "description": "Title of notification message. (backup all)",
+        "placeholders": {
+            "ending_comment_of_job": {
+                "content": "작업 완료"
+            },
+            "type_of_job": {
+                "content": "모두 백업"
+            }
+        }
+    },
+    "notificationTitle2": {
+        "message": "$ending_comment_of_job$! ($type_of_job$)",
+        "description": "Title of notification message. (backup selected)",
+        "placeholders": {
+            "ending_comment_of_job": {
+                "content": "작업 완료"
+            },
+            "type_of_job": {
+                "content": "선택 백업"
+            }
+        }
+    },
+    "notificationTitle3": {
+        "message": "$ending_comment_of_job$",
+        "description": "Title of notification message. (load to browser)",
+        "placeholders": {
+            "ending_comment_of_job": {
+                "content": "백업 데이터를 불러왔습니다."
+            }
+        }
+    },
+    "notificationResultHeading1": {
+        "message": "결과: ",
+        "description": "Opening ment before job status"
+    },
+    "notificationResultHeading2": {
+        "message": "저장한 이름: ",
+        "description": "Opening ment before backup name"
+    },
+    "comboboxDescription": {
+        "message": "불러올 백업을 선택하세요: ",
+        "description": "guide message for loading combobox"
+    },
+    "css_td1_width": {
+        "message": "20%"
+    },
+    "css_button_font_size": {
+        "message": "3vw"
+    }
+}
