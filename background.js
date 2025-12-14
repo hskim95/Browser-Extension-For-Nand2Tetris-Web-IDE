@@ -1,5 +1,5 @@
 // background.js
-/// <reference path="/usr/lib/node_modules/chrome-types/index.d.ts" />
+/// <reference path="/home/novice/node_modules/@types/chrome/index.d.ts" />
 
 // ===== Preset =====
 const rootURL = "https://nand2tetris.github.io/web-ide/";
@@ -27,7 +27,7 @@ const isNotCached = () => cachedBackup.hasOwnProperty("_empty");
 async function cacheData() {
     const getLocalStorage = await chrome.storage.local.get(null);
     const entriesArray = Object.entries(getLocalStorage);
-    if (isNotCached) delete cachedBackup._empty;
+    if (isNotCached()) delete cachedBackup["_empty"];
     for (let i = 0; i < entriesArray.length; i++) {
         const fixedIndex = i;
         cachedBackup[entriesArray[fixedIndex][0]] = entriesArray[fixedIndex][1];
@@ -137,6 +137,17 @@ async function ensureContentScriptAlive(tabId) {
 }
 
 // ===== Initialize =====
+const cachingTask = new Promise((resolve, reject) => {
+    const result = cacheData();
+    if (result) {
+        console.log("Initial caching finighed!: " + result);
+        resolve(true);
+    }
+    else {
+        reject(false);
+    }
+});
+
 // 앱이 리로드 된 경우 열린 탭 순회하연서 아이콘 최신화
 chrome.runtime.onInstalled.addListener((_details) => {
     console.log("[Debug] install or update detected(" + _details.reason.toString() + "): background.js");
@@ -198,7 +209,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             let trivialName = backupName;
             for (let i = 0; i < 1000; i++) {
                 let j = 0;
-                for (j = 0; j < occupiedKeys.length; j++) {
+                for (; j < occupiedKeys.length; j++) {
                     if (trivialName === occupiedKeys[j]) {
                         occupiedKeys.splice(j, 1);
                         j = -1;
@@ -217,6 +228,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
                 sendResponse({ status: "error", message: chrome.runtime.lastError.message });
             }
             else {
+                cachedBackup[[trivialName]] = responseData;
                 console.log("[Debug] send Response (backup ok): background.js");
                 sendResponse({ status: "ok" , message: trivialName });
                 console.log("[Debug] backupData: " + trivialName);
@@ -229,7 +241,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         console.log("[Debug] get messaage (load backuplist): background.js");
         (async () => {
             try {
-                if (isNotCached()) await cacheData();
+                // cacheData();
                 const keyList = Object.keys(cachedBackup).filter((key) => key.startsWith(BackupNamingRule.commonHeading));
                 if (keyList.length !== 0) {
                     sendResponse({ status: "ok", message : keyList });
@@ -287,7 +299,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === "local") {
         (async () => {
             for (const [key, { oldValue, newValue }] of Object.entries(changes)) {
-                if (key.startsWith("backupData")) {
+                if (key.startsWith(BackupNamingRule.commonHeading)) {
                     if (newValue) {
                         if (oldValue) {
                             // vvvvv Remove on Release!!! vvvvv
@@ -314,3 +326,4 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
     return;
 });
+
