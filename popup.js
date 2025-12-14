@@ -1,6 +1,3 @@
-// popup.js
-/// <reference path="/home/novice/node_modules/@types/chrome/index.d.ts" />
-
 // ===== Preset =====
 const ProjectNumber = Object.freeze({
     PROJECT_MIN: 1,
@@ -163,18 +160,15 @@ let updateFlag = false;
 
 // ===== function =====
 async function updateBackupList() {
-    console.log("[Debug] searching backup data: popup.js");
     const response = await chrome.runtime.sendMessage({action: "load backuplist"});
-    console.log("[Debug] found backup data: " + response.status + " : popup.js");
     if (response.status === "error") {
         return false;
     }
     else {
         if (updateFlag) {
-            console.log("[Debug] Update channel is busy...: popup.js@load backuplist");
+            return true;
         }
         else {
-            console.log("[Debug] not busy right now. start update: popup.js@self");
             const keyList = response.message;
             await appendBackupList(keyList);
         }
@@ -187,7 +181,6 @@ async function appendBackupList(keyList) {
     const comboboxString = makeComboboxHTMLString(keyList);
     while (backupCombobox.childElementCount > 0) {
         backupCombobox.removeChild(backupCombobox.lastChild);
-        console.log("removed child in combobox. child left: " + backupCombobox.childElementCount + ": popup.js");
     }
     injectDocumentFragment(comboboxString, backupCombobox);
     updateFlag = false;
@@ -242,7 +235,6 @@ function collectOptions() {
         const fixedIndex = i;
         projectOptionBit |= (unitProjectList[fixedIndex].checked << fixedIndex);
     }
-    console.log("[Debug] project option bit: " + projectOptionBit);
 
     let extensionOptionBit = 0;
     for (let i = 0; i < FileExtensions.length; i++) {
@@ -252,14 +244,12 @@ function collectOptions() {
         !unitExtensionList[fixedIndex].disabled << fixedIndex);
     }
 
-    console.log("[Debug] extension option bit: " + extensionOptionBit);
     return { project: projectOptionBit, extension: extensionOptionBit };
 }
 
 function injectDocumentFragment(htmlString, parent) {
     const template = document.createElement("template");
     template.innerHTML = htmlString;
-    console.log("appendChild called from update action: popup.js");
     parent.appendChild(template.content);
 }
 
@@ -302,17 +292,10 @@ function addLocalizedMessage() {
     const labelList = document.querySelectorAll('label[id$="-label"][data-origin="static"]');
     const labelArray = Array.from(labelList);
 
-    console.log("labelArray[0]: " + labelArray[0].textContent);
-    console.log("labelArray[1]: " + labelArray[1].textContent);
-    console.log("labelArray[2]: " + labelArray[2].textContent);
-
     labelArray[0].firstChild.nodeValue = "[" +
     chrome.i18n.getMessage("localization_All");
     labelArray[1].firstChild.nodeValue = "[" +
     chrome.i18n.getMessage("localization_All");
-    /* labelArray[2].textContent = labelArray[2].textContent.replace(
-        "__MSG_comboboxDescription__", chrome.i18n.getMessage("comboboxDescription"));
-        */
     labelArray[2].textContent = chrome.i18n.getMessage("comboboxDescription");
 }
 
@@ -328,18 +311,13 @@ async function onDOMLoaded() {
 document.addEventListener("DOMContentLoaded", onDOMLoaded);
 
 backupAllButtonElement.addEventListener("click", async () => {
-    // To Do: read all local storage data(key:value pairs)
-    // and save to extension storage
-    console.log("[Debug] send message (backup, all): popup.js");
-
     const response = await chrome.runtime.sendMessage({
         action: "backup",
         option: { project: optionAllProject, extension: optionAllExtension }
     });
-    console.log("[Debug] checking response: " + response + " : popup.js");
 
     chrome.notifications.create({
-        iconUrl: "Extension128.png",
+        iconUrl: "icons/Extension128.png",
         title: chrome.i18n.getMessage("notificationTitle1"),
         message: chrome.i18n.getMessage("notificationResultHeading1") + response.status +
         "\n" + chrome.i18n.getMessage("notificationResultHeading2") + response.message,
@@ -354,15 +332,11 @@ backupAllButtonElement.addEventListener("click", async () => {
  *
  */
 backupSelectionButtonElement.addEventListener("click", async () => {
-    // vvvvv Remove on Release!!! vvvvv
-    console.log("[Debug] send message (backup, selection): popup.js");
-    // ^^^^^ Remove on Release!!! ^^^^^
-
     const options = collectOptions();
 
     if (options.project * options.extension === 0) {
         chrome.notifications.create({
-            iconUrl: "Extension128.png",
+            iconUrl: "icons/Extension128.png",
             title: chrome.i18n.getMessage("refuseTitle"),
             message: chrome.i18n.getMessage("refuseDetail"),
             type: "basic"
@@ -372,12 +346,8 @@ backupSelectionButtonElement.addEventListener("click", async () => {
 
     const response = await chrome.runtime.sendMessage({action: "backup", option: options });
 
-    // vvvvv Remove on Release!!! vvvvv
-    console.log("[Debug] checking response: " + response + " : popup.js");
-    // ^^^^^ Remove on Release ^^^^^
-
     chrome.notifications.create({
-        iconUrl: "Extension128.png",
+        iconUrl: "icons/Extension128.png",
         title: chrome.i18n.getMessage("notificationTitle2"),
         message: chrome.i18n.getMessage("notificationResultHeading1") + response.status + "\n" + chrome.i18n.getMessage("notificationResultHeading2") + response.message,
         type: "basic"
@@ -392,11 +362,11 @@ backupSelectionButtonElement.addEventListener("click", async () => {
  */
 loadButtonElement.addEventListener("click", () => {
     const choice = backupCombobox.value;
-    if (choice != "") {
+    if (choice !== "") {
         (async () => {
             const response = await chrome.runtime.sendMessage({ action: "load to browser", backupName: choice });
             chrome.notifications.create({
-                iconUrl: "Extension128.png",
+                iconUrl: "icons/Extension128.png",
                 title: chrome.i18n.getMessage("notificationTitle3"),
                 message: chrome.i18n.getMessage("notificationResultHeading1") + response.status,
                 type: "basic"
@@ -404,7 +374,7 @@ loadButtonElement.addEventListener("click", () => {
         })();
     }
     else {
-        console.warn("[Warning] Try loading without any selected data.");
+        console.warn("[Warning] Try loading without any selected data!");
     }
     return true;
 });
@@ -413,15 +383,11 @@ loadButtonElement.addEventListener("click", () => {
  * 서비스 워커로부터 백업 데이터의 업데이트 메시지를 받아서 처리하는 콜백 함수를 리스너로 추가.
  */
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    console.log("[Debug] chrome.runtime.onMessage Event: popup.js");
     if (message.action === "update") {
-        console.log("[Debug] get message (update): popup.js");
         if (updateFlag) {
-            console.log("[Debug] Update channel is busy...: popup.js@update");
             sendResponse({ status: "busy" });
         }
         else {
-            console.log("[Debug] not busy right now. start update: popup.js@forced");
             const keyList = message.message;
             (async () => {
                 const appendResult = await appendBackupList(keyList);
