@@ -1,21 +1,22 @@
 # Browser-Extension-For-Nand2Tetris-Web-IDE
 
-이 프로젝트는 온라인 버전의 Nand to Tetris(by Noam Nisan & Shimon Schocken) IDE(간단히 web-IDE)를 사용하는 학습자에게 별도의 백업 기능을 제공하기 위해 개발되었습니다. 이 브라우저 확장앱은 크로뮴 기반 브라우저에서 동작하는 것을 전제로 제작되었습니다.
+이 프로젝트는 온라인 버전의 Nand to Tetris(by Noam Nisan & Shimon Schocken) IDE(<https://nand2tetris.github.io/web-ide/about/>)를 사용하는 학습자에게 별도의 백업 기능을 제공하기 위해 개발되었습니다. 이 브라우저 확장앱은 크로뮴 기반 브라우저에서 동작하는 것을 전제로 제작되었습니다.
 
-This project is developed for learners using online version of **Nand to Tetris**(by Noam Nisan & Shimon Schocken) IDE(simply web-IDE) to provide additional backup functions. This browser extension may work properly on Chromium-based browsers.
+This project is developed for learners using online version of **Nand to Tetris**(by Noam Nisan & Shimon Schocken) IDE(<https://nand2tetris.github.io/web-ide/about/>) to provide additional backup functions. This browser extension may work properly on Chromium-based browsers.
 
 
 ## 기능 (features)
-
+### 1.0.0
 * 브라우저에 저장된 유저가 작성한 소스 전체 또는 일부 백업 (확장앱 전용 스토리지에 저장)
-* 유저가 작성한 소스 전체 또는 일부를 .sav 형식 파일로 저장
 * 확장앱 또는 파일 형태의 백업 데이터를 브라우저로 불러오기
+* ~~유저가 작성한 소스 전체 또는 일부를 .sav 형식 파일로 저장~~ (다음 버전에 추가)
 
 ---
 
+### 1.0.0
 * Backup all/selected user-sources in browser local storage (will be saved in extension storage)
-* Save all/selected user-sources as a binary file(.sav)
 * Load backup data to browser (from extension storage or binary file)
+* ~~Save all/selected user-sources as a binary file(.sav)~~ (available in next version)
 
 
 ## 참고 사항 (Notes)
