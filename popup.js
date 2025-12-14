@@ -1,5 +1,5 @@
 // popup.js
-/// <reference path="/usr/lib/node_modules/chrome-types/index.d.ts" />
+/// <reference path="/home/novice/node_modules/@types/chrome/index.d.ts" />
 
 // ===== Preset =====
 const ProjectNumber = Object.freeze({
@@ -7,6 +7,46 @@ const ProjectNumber = Object.freeze({
     PROJECT_MAX: 8
 });
 const projectSize = ProjectNumber.PROJECT_MAX - ProjectNumber.PROJECT_MIN + 1;
+
+class ProjectMediator {
+    constructor() {
+        this.stateArray = new Array(projectSize).fill(false);
+    }
+
+    isAllChecked = () => this.stateArray.every((state) => state);
+
+    getState(index = null) {
+        if (index === null) {
+            return this.stateArray.slice();
+        }
+        else return this.stateArray.slice()[index];
+    }
+
+    setState(value, index = null) {
+        if (index === null) {
+            for (let i = 0; i < this.stateArray.length; i++) {
+                this.stateArray[i] = value;
+                this.#updateState(i);
+            }
+            this.#updateState();
+        }
+        else {
+            this.stateArray[index] = value;
+            this.#updateState(index);
+            this.#updateState();
+        }
+    }
+
+    #updateState(index = null) {
+        if (index === null) checkAllProjects.checked = this.isAllChecked();
+        else unitProjectList[index].checked = this.stateArray[index];
+        dependencyMediator.updateDependency();
+    }
+}
+
+const projectMediator = Object.freeze(new ProjectMediator());
+
+
 const FileExtensions = Object.freeze([
     ".hdl",
     ".asm",
@@ -16,6 +56,43 @@ const FileExtensions = Object.freeze([
     ".tst"
 ]);
 
+class ExtensionMediator {
+    constructor() {
+        this.stateArray = new Array(FileExtensions.length).fill(false);
+    }
+
+    isAllChecked = () => this.stateArray.every((state) => state);
+
+    getState(index = null) {
+        if (index === null) {
+            return this.stateArray.slice();
+        }
+        else return this.stateArray.slice()[index];
+    }
+
+    setState(value, index = null) {
+        if (index === null) {
+            for (let i = 0; i < this.stateArray.length; i++) {
+                this.stateArray[i] = value;
+            }
+        }
+        else this.stateArray[index] = value;
+        this.#updateState();
+    }
+
+    #updateState() {
+        for (let i = 0; i < this.stateArray.length; i++) {
+            unitExtensionList[i].checked = this.stateArray[i];
+        }
+        checkAllExtensions.checked = this.isAllChecked();
+    }
+}
+
+const extensionMediator = Object.freeze(new ExtensionMediator());
+
+// Dependency from Project number to File extensions
+// e.g. 1,2,3 -> .hdl(=FE[0])
+//          5 -> .hdl, .hack (=FE[0], FE[2])
 const DependencyTable = Object.freeze({
     1: [0],
     2: [0],
@@ -26,6 +103,28 @@ const DependencyTable = Object.freeze({
     7: [3],
     8: [3]
 });
+
+class DependencyMediator {
+    updateDependency() {
+        let referenceBit = collectOptions().project;
+        const dependencySet = new Set();
+        for (let i = 0; i < unitProjectList.length; i++) {
+            const projectNumber = i + 1;
+            if (referenceBit & 1) {
+                DependencyTable[projectNumber].forEach(value =>
+                dependencySet.add(value));
+            }
+            referenceBit >>>= 1;
+            if (referenceBit === 0) break;
+        }
+        for (let i = 0; i < unitExtensionList.length - 2; i++) {
+            const fixedIndex = i;
+            unitExtensionList[fixedIndex].disabled = !dependencySet.has(fixedIndex);
+        }
+    }
+}
+
+const dependencyMediator = Object.freeze(new DependencyMediator());
 
 // 8-bit Comp(0b1)
 const optionAllProject =
@@ -106,12 +205,11 @@ function addProjectCheckbox() {
     injectDocumentFragment(contentString, projectParent);
     unitProjectList = document.querySelectorAll('input[type="checkbox"][name="project"][data-origin="injected"]');
     checkAllProjects.addEventListener("change", () => {
-        unitProjectList.forEach((checkbox) => checkbox.checked = checkAllProjects.checked);
+        projectMediator.setState(checkAllProjects.checked);
     })
-    unitProjectList.forEach((checkbox) => {
+    unitProjectList.forEach((checkbox, index) => {
         checkbox.addEventListener("change", () => {
-            const allChecked = Array.from(unitProjectList).every(project => project.checked);
-            checkAllProjects.checked = allChecked;
+            projectMediator.setState(checkbox.checked, index);
         });
     });
 }
@@ -129,40 +227,16 @@ function addExtensionCheckbox() {
     injectDocumentFragment(contentString, extensionParent);
     unitExtensionList = document.querySelectorAll('input[type="checkbox"][name="extension"][data-origin="injected"]');
     checkAllExtensions.addEventListener("change", () => {
-        unitExtensionList.forEach((checkbox) => checkbox.checked = checkAllExtensions.checked);
+        extensionMediator.setState(checkAllExtensions.checked);
     });
-    unitExtensionList.forEach(checkbox => {
+    unitExtensionList.forEach((checkbox, index) => {
         checkbox.addEventListener("change", () => {
-            const allChecked = Array.from(unitExtensionList).every(project => project.checked);
-            checkAllExtensions.checked = allChecked;
-        });
-    });
-}
-
-function addProjectExtensionDependency() {
-    unitProjectList.forEach(checkbox => {
-        checkbox.addEventListener("change", () => {
-            const dependencySet = new Set();
-            let currentProjectBit = collectOptions().project;
-            for (let i = 0; i < unitProjectList.length; i++) {
-                const projectNumber = i + 1;
-                if (currentProjectBit & 1) {
-                    DependencyTable[projectNumber].forEach(value => dependencySet.add(value));
-                }
-                currentProjectBit >>>= 1;
-                if (currentProjectBit === 0) break;
-            }
-            for (let i = 0; i < unitExtensionList.length - 2; i++) {
-                const fixedIndex = i;
-                unitExtensionList[fixedIndex].disabled =
-                !dependencySet.has(fixedIndex);
-            }
+            extensionMediator.setState(checkbox.checked, index);
         });
     });
 }
 
 function collectOptions() {
-    const projectSize = ProjectNumber.PROJECT_MAX - ProjectNumber.PROJECT_MIN + 1;
     let projectOptionBit = 0;
     for (let i = 0; i < projectSize; i++) {
         const fixedIndex = i;
@@ -173,7 +247,9 @@ function collectOptions() {
     let extensionOptionBit = 0;
     for (let i = 0; i < FileExtensions.length; i++) {
         const fixedIndex = i;
-        extensionOptionBit |= (unitExtensionList[fixedIndex].checked << fixedIndex);
+        extensionOptionBit |=
+        (unitExtensionList[fixedIndex].checked &&
+        !unitExtensionList[fixedIndex].disabled << fixedIndex);
     }
 
     console.log("[Debug] extension option bit: " + extensionOptionBit);
@@ -243,7 +319,7 @@ function addLocalizedMessage() {
 async function onDOMLoaded() {
     addProjectCheckbox();
     addExtensionCheckbox();
-    addProjectExtensionDependency();
+    dependencyMediator.updateDependency();
     addLocalizedMessage();
     await updateBackupList();
 }
@@ -315,22 +391,22 @@ backupSelectionButtonElement.addEventListener("click", async () => {
  * 불러오기 버튼 클릭 시 서비스 워커에 선택한 백업파일 정보와 함께 불러오기 기능 요청하는 콜백 추가.
  */
 loadButtonElement.addEventListener("click", () => {
-        const choice = backupCombobox.value;
-        if (choice != "") {
-            (async () => {
-                const response = await chrome.runtime.sendMessage({ action: "load to browser", backupName: choice });
-                chrome.notifications.create({
-                    iconUrl: "Extension128.png",
-                    title: chrome.i18n.getMessage("notificationTitle3"),
-                    message: chrome.i18n.getMessage("notificationResultHeading1") + response.status,
-                    type: "basic"
-                });
-            })();
-        }
-        else {
-            console.warn("[Warning] Try loading without any selected data.");
-        }
-        return true;
+    const choice = backupCombobox.value;
+    if (choice != "") {
+        (async () => {
+            const response = await chrome.runtime.sendMessage({ action: "load to browser", backupName: choice });
+            chrome.notifications.create({
+                iconUrl: "Extension128.png",
+                title: chrome.i18n.getMessage("notificationTitle3"),
+                message: chrome.i18n.getMessage("notificationResultHeading1") + response.status,
+                type: "basic"
+            });
+        })();
+    }
+    else {
+        console.warn("[Warning] Try loading without any selected data.");
+    }
+    return true;
 });
 
 /**
