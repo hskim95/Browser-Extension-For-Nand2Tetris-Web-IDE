@@ -1,6 +1,3 @@
-// content.js
-/// <reference path="/usr/lib/node_modules/chrome-types/index.d.ts" />
-
 // ===== Preset =====
 const ExtensionDecoder = Object.freeze({
     [1 << 0]: ".hdl",
@@ -31,7 +28,7 @@ function decodeProjectBit(bit) {
 function decodeExtensionBit(bit) {
     const selectedExtension = [];
     for (const selectionBit of Object.keys(ExtensionDecoder)) {
-        if (bit & selectionBit) { // caution: use bitwise-and(&), not "&&"
+        if (bit & selectionBit) {
             selectedExtension.push(ExtensionDecoder[selectionBit]);
         }
     }
@@ -52,43 +49,29 @@ function packStorageAsObject(option) {
                 }
         }
     }
-    // vvvvv Remove on Release!!! vvvvv
-    console.log("[Debug] data packing result: " + Object.keys(data).toString());
-    // ^^^^^ Remove on Release!!! ^^^^^
     return data;
 }
 
 // ===== Initialize =====
-
-// vvvvv Remove on Release!!! vvvvv
-console.log("[DEBUG] injected me: content.js");
-// ^^^^^ Remove on Release!!! ^^^^^
-
-chrome.runtime.onMessage.addListener(
-    (message, _sender, sendResponse) => {
-        if (message.action === "getData") {
-            const dataPackage = packStorageAsObject(message.option);
-            console.log("[Debug] storage data is now ready: " + dataPackage +" :content.js");
-            console.log("[Debug] send Response to background.js: content.js");
-            sendResponse(dataPackage);
-            return true;
-        }
-        else if (message.action === "override") {
-            (async () => {
-                const loadedData = message.data;
-                for (let [key, value] of Object.entries(loadedData)) {
-                    localStorage.setItem(key, value);
-                }
-                console.log("[Debug] data loading finished: content.js");
-                sendResponse({ status: "loading ok" });
-            })();
-            return true;
-        }
-        else if (message.action === "ping test") {
-            sendResponse({ status: "I am alive" });
-            return true;
-        }
-        console.log("[Debug] refuse Response to background.js: content.js");
-        return false;
-
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message.action === "getData") {
+        const dataPackage = packStorageAsObject(message.option);
+        sendResponse(dataPackage);
+        return true;
+    }
+    else if (message.action === "override") {
+        (async () => {
+            const loadedData = message.data;
+            for (let [key, value] of Object.entries(loadedData)) {
+                localStorage.setItem(key, value);
+            }
+            sendResponse({ status: "loading ok" });
+        })();
+        return true;
+    }
+    else if (message.action === "ping test") {
+        sendResponse({ status: "I am alive" });
+        return true;
+    }
+    return false;
 });

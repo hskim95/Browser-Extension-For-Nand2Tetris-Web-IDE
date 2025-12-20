@@ -1,6 +1,3 @@
-// background.js
-/// <reference path="/home/novice/node_modules/@types/chrome/index.d.ts" />
-
 // ===== Preset =====
 const rootURL = "https://nand2tetris.github.io/web-ide/";
 const cachedBackup = { _empty: true };
@@ -49,13 +46,11 @@ async function updateTabIcon(tabId, isAllowed) {
     const targetTab = await chrome.tabs.get(tabId);
     const isON = arguments.length === 2 ? isAllowed : (targetTab?.url);
     if (isON) {
-        console.log("set icon for valid tab: " + targetTab.toString() + ": background.js");
         chrome.action.enable(tabId); // 버튼 활성화
         chrome.action.setBadgeBackgroundColor({ tabId: tabId, color: "green" });
         chrome.action.setBadgeText({ tabId: tabId, text: "ON" });
     }
     else {
-        console.log("set icon for invalid tab: " + targetTab.toString() + ": background.js");
         chrome.action.disable(tabId); // 클릭 불가능. 아예 숨기는 건 보안 이슈로 불가.
         chrome.action.setBadgeBackgroundColor({ color: "red" });
         chrome.action.setBadgeText({ text: "OFF" });
@@ -72,7 +67,6 @@ async function updateTabIcon(tabId, isAllowed) {
  *
  */
 async function updateTabsIcon(tabs) {
-    //** @type {Array} */
     const tasks = tabs.map(async (tab) => await updateTabIcon(tab.id));
     return Promise.allSettled(tasks);
 }
@@ -89,18 +83,7 @@ async function notifyUpdate() {
     const keyList = Object.keys(cachedBackup);
     try {
         const response = await chrome.runtime.sendMessage({ action: "update", message: keyList });
-        // vvvvv Remove on Release!!! vvvvv
-        if (response) {
-            console.log("Popup updated backuplist: " + response.status + ": background.js");
-        }
-        else {
-            console.log("Popup not responding. Maybe popup is closed.: background.js");
-        }
-        // ^^^^^ Remove on Release!!! ^^^^^
     } catch (error) {
-        // vvvvv Remove on Release!!! vvvvv
-        console.log("Popup not responding. Maybe popup is closed.: background.js");
-        // ^^^^^ Remove on Release!!! ^^^^^
     } finally {
         return true;
     }
@@ -120,18 +103,16 @@ async function ensureContentScriptAlive(tabId) {
         return true;
     } catch (error) {
         if (error.message.includes("establish connection")) {
-            console.log("content.js not found. try inject to target tab.");
             try {
                 return await chrome.scripting.executeScript({
                     target: { tabId },
                     files: ["content.js"]
                 });
             } catch (error) {
-                Console.error("Something went wrong during manual injection: background.js");
                 return false;
             }
         }
-        console.error(error);
+        console.error("error.");
         return false;
     }
 }
@@ -140,7 +121,6 @@ async function ensureContentScriptAlive(tabId) {
 const cachingTask = new Promise((resolve, reject) => {
     const result = cacheData();
     if (result) {
-        console.log("Initial caching finighed!: " + result);
         resolve(true);
     }
     else {
@@ -150,16 +130,11 @@ const cachingTask = new Promise((resolve, reject) => {
 
 // 앱이 리로드 된 경우 열린 탭 순회하연서 아이콘 최신화
 chrome.runtime.onInstalled.addListener((_details) => {
-    console.log("[Debug] install or update detected(" + _details.reason.toString() + "): background.js");
     (async () => {
         await cacheData();
 
         const currentTabs = await chrome.tabs.query({ });
-        if (!currentTabs.length) {
-            console.log("[Debug] found no active tabs: background.js");
-        }
-        else
-        {
+        if (currentTabs.length) {
             await updateTabsIcon(currentTabs);
         }
     })();
@@ -179,26 +154,22 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
  * "load to browser"는 불러오기 버튼을 눌렀을 때 사용자가 선택한 키 값으로 저장소에 있는 백업을 브라우저의 도메인 로컬 저장소에 불러오는(덮어씌우는) 요청
  */
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    console.log("[Debug] chrome.runtime.onMessage Event: background.js");
     if (message.action === "backup") {
-        console.log("[Debug] get messaage (backup): background.js");
         (async () => {
             const tab = await chrome.tabs.query({ url: rootURL + "*", active: true });
-            console.log("[Debug] chrome.tabs.query result: " + tab.toString() + ": background.js");
             // To Do: distinguish current tab? is it necessary?
             // when using multi-tabs, which data will be chosen?
             const tabId = tab[0].id;
 
             await ensureContentScriptAlive(tabId);
-
-            console.log("[Debug] send message (getData): background.js");
-            const responseData = await chrome.tabs.sendMessage( // ask content.js about localStorage data
+            const responseData = await chrome.tabs.sendMessage(
                 tabId,
                 { action: "getData", option: message.option }, // message
                 { frameId : 0 } // main frame only
             );
             let backupNameHead;
-            if (message.option.project === ((1<<8) - 1) && message.option.extension === ((1<<6) - 1)) {
+            if (message.option.project === ((1<<8) - 1) &&
+                message.option.extension === ((1<<6) - 1)) {
                 backupNameHead = backupName1;
             }
             else backupNameHead = backupName2;
@@ -224,24 +195,18 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             }
             chrome.storage.local.set({ [trivialName]: responseData });
             if (chrome.runtime.lastError) {
-                console.error("[Debug] send Response (backup error): background.js");
                 sendResponse({ status: "error", message: chrome.runtime.lastError.message });
             }
             else {
                 cachedBackup[[trivialName]] = responseData;
-                console.log("[Debug] send Response (backup ok): background.js");
                 sendResponse({ status: "ok" , message: trivialName });
-                console.log("[Debug] backupData: " + trivialName);
-
                 await notifyUpdate();
             }
         })();
     }
     else if (message.action === "load backuplist") {
-        console.log("[Debug] get messaage (load backuplist): background.js");
         (async () => {
             try {
-                // cacheData();
                 const keyList = Object.keys(cachedBackup).filter((key) => key.startsWith(BackupNamingRule.commonHeading));
                 if (keyList.length !== 0) {
                     sendResponse({ status: "ok", message : keyList });
@@ -250,14 +215,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
                     sendResponse({ status: "no Backup", message : keyList });
                 }
             }
-            catch (e) {
-                console.error("catch error(load): background.js");
+            catch (error) {
                 sendResponse({ status: "error" });
             }
         })();
     }
     else if (message.action === "load to browser") {
-        console.log("[Debug] get messaage (load to browser): background.js");
         const backupName = message.backupName;
         (async () => {
             try {
@@ -265,13 +228,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
                 const getTab = chrome.tabs.query({ url: rootURL + "*", active : true });
 
                 const [{[backupName] : loaded}, tab] = await Promise.all([load, getTab]);
-                console.log("[Debug] chrome.storage.local.get result: " + loaded + ": background.js");
-
-                console.log("[Debug] chrome.tabs.query result: " + tab + ": background.js");
                 const tabId = tab[0].id;
 
                 await ensureContentScriptAlive(tabId);
-                console.log("[Debug] send message (getData): background.js");
                 const response = await chrome.tabs.sendMessage(
                     tabId,
                     { action: "override", data: loaded }, // message
@@ -280,8 +239,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
                 sendResponse({ status: response });
                 return true;
             }
-            catch (e) {
-                console.error(e);
+            catch (error) {
+                console.error("error.");
             }
         })();
     }
@@ -293,29 +252,14 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
  * 사용자가 직접 저장소에 접근해서 백업 데이터를 수정한 경우 변경 사항을 즉각 업데이트 하는 용도의 콜백 함수 등록
  */
 chrome.storage.onChanged.addListener((changes, areaName) => {
-    // vvvvv Remove on Release!!! vvvvv
-    console.log("somethings changed: background.js");
-    // ^^^^^ Remove on Release!!! ^^^^^
     if (areaName === "local") {
         (async () => {
             for (const [key, { oldValue, newValue }] of Object.entries(changes)) {
                 if (key.startsWith(BackupNamingRule.commonHeading)) {
                     if (newValue) {
-                        if (oldValue) {
-                            // vvvvv Remove on Release!!! vvvvv
-                            console.log("Overriding old data: background.js");
-                            // ^^^^^ Remove on Release!!! ^^^^^
-                        }
-                        else {
-                            // vvvvv Remove on Release!!! vvvvv
-                            console.log("New key generated: background.js");
-                            // ^^^^^ Remove on Release!!! ^^^^^
-                        }
-                        console.log("New backup: " + newValue.toString());
                         cachedBackup[key] = newValue;
                     }
                     else {
-                        console.log("removed data: background.js");
                         delete cachedBackup[key.toString()];
                     }
                 }

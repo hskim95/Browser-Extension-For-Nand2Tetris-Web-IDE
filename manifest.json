@@ -4,12 +4,14 @@
     "name": "__MSG_name__",
     "version": "1.0.0",
     "description": "__MSG_description__",
-    "icons": {},
+    "icons": {
+        "128": "icons/Extension128.png"
+    },
     "action": {
         "default_icon": {
-            "16": "Extension16.png",
-            "32": "Extension32.png",
-            "128": "Extension128.png"
+            "16": "icons/Extension16.png",
+            "32": "icons/Extension32.png",
+            "128": "icons/Extension128.png"
         },
         "default_title": "__MSG_title__",
         "default_popup": "popup.html",
