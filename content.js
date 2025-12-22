@@ -36,17 +36,18 @@ function decodeExtensionBit(bit) {
 }
 
 function packStorageAsObject(option) {
+    const decodedProject = option.project ? decodeProjectBit(option.project) : null;
+    const decodedExtension = option.extension ? decodeExtensionBit(option.extension) : null;
+
     const data = {};
     for (let i = 0; i < localStorage.length; i++) {
         const fixedIndex = i;
         const key = localStorage.key(fixedIndex);
         if (option.project && option.extension) {
-            const decodedProject = decodeProjectBit(option.project);
-            const decodedExtension = decodeExtensionBit(option.extension);
             if (decodedProject.some(project => key.startsWith(project)) &&
                 decodedExtension.some(extension => key.endsWith(extension))) {
                 data[key] = localStorage.getItem(key);
-                }
+            }
         }
     }
     return data;

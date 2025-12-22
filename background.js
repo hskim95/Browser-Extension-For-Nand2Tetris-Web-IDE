@@ -156,12 +156,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === "backup") {
         (async () => {
-            const tab = await chrome.tabs.query({ url: rootURL + "*", active: true });
-            // To Do: distinguish current tab? is it necessary?
-            // when using multi-tabs, which data will be chosen?
-            const tabId = tab[0].id;
-
+            const tabId = message.tabId;
             await ensureContentScriptAlive(tabId);
+
             const responseData = await chrome.tabs.sendMessage(
                 tabId,
                 { action: "getData", option: message.option }, // message
@@ -175,7 +172,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             else backupNameHead = backupName2;
             Object.freeze(backupNameHead);
             const date = new Date();
-            const backupName = [backupNameHead, date.getFullYear(), date.getMonth()+1, date.getDate()].join("-");
+            const backupName = [backupNameHead, 
+                date.getFullYear(), date.getMonth()+1, date.getDate()].join("-");
             let occupiedKeys = await chrome.storage.local.getKeys();
             let trivialName = backupName;
             for (let i = 0; i < 1000; i++) {
@@ -224,11 +222,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         const backupName = message.backupName;
         (async () => {
             try {
-                const load = chrome.storage.local.get(backupName);
-                const getTab = chrome.tabs.query({ url: rootURL + "*", active : true });
-
-                const [{[backupName] : loaded}, tab] = await Promise.all([load, getTab]);
-                const tabId = tab[0].id;
+                const tabId = message.tabId;
+                const load = await chrome.storage.local.get(backupName);
+                const loaded = load[backupName];
 
                 await ensureContentScriptAlive(tabId);
                 const response = await chrome.tabs.sendMessage(
@@ -236,7 +232,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
                     { action: "override", data: loaded }, // message
                     { frameId : 0 } // main frame only
                 );
-                sendResponse({ status: response });
+                sendResponse({ status: response.status });
                 return true;
             }
             catch (error) {

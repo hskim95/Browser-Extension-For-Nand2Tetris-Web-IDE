@@ -16,7 +16,7 @@ class ProjectMediator {
         if (index === null) {
             return this.stateArray.slice();
         }
-        else return this.stateArray.slice()[index];
+        else return this.stateArray[index];
     }
 
     setState(value, index = null) {
@@ -64,7 +64,7 @@ class ExtensionMediator {
         if (index === null) {
             return this.stateArray.slice();
         }
-        else return this.stateArray.slice()[index];
+        else return this.stateArray[index];
     }
 
     setState(value, index = null) {
@@ -165,41 +165,67 @@ async function updateBackupList() {
         return false;
     }
     else {
-        if (updateFlag) {
-            return true;
-        }
+        if (updateFlag) return true;
         else {
             const keyList = response.message;
             await appendBackupList(keyList);
+            return true;
         }
     }
-    return true;
 }
 
 async function appendBackupList(keyList) {
     updateFlag = true;
-    const comboboxString = makeComboboxHTMLString(keyList);
-    while (backupCombobox.childElementCount > 0) {
-        backupCombobox.removeChild(backupCombobox.lastChild);
-    }
-    injectDocumentFragment(comboboxString, backupCombobox);
+    const documentFragment = document.createDocumentFragment();
+
+    const defaultOption = document.createElement("option");
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    defaultOption.hidden = true;
+    defaultOption.value = "";
+    defaultOption.textContent = "...";
+    documentFragment.appendChild(defaultOption);
+
+    keyList.forEach((key) => {
+        const backupOption = document.createElement("option");
+        backupOption.value = key;
+        backupOption.textContent = key;
+        documentFragment.appendChild(backupOption);
+    });
+    backupCombobox.replaceChildren(documentFragment);
+
     updateFlag = false;
     return true;
 }
 
+function createProjectLabelCheckboxSet(index) {
+    const labelElementWithInnerCheckbox = document.createElement("label");
+    labelElementWithInnerCheckbox.setAttribute("for", "project-" + index);
+    const textNodeBegin = document.createTextNode("[" + index);
+    const checkboxElement = document.createElement("input");
+    checkboxElement.type = "checkbox";
+    checkboxElement.name = "project";
+    checkboxElement.dataset.origin = "injected";
+    checkboxElement.id = "project-" + index;
+    const textNodeEnd = document.createTextNode("]");
+    labelElementWithInnerCheckbox.appendChild(textNodeBegin);
+    labelElementWithInnerCheckbox.appendChild(checkboxElement);
+    labelElementWithInnerCheckbox.appendChild(textNodeEnd);
+    return labelElementWithInnerCheckbox;
+}
+
 function addProjectCheckbox() {
-    const partialString = [];
+    const checkboxFragment = document.createDocumentFragment();
     for (let i = ProjectNumber.PROJECT_MIN; i <= ProjectNumber.PROJECT_MAX; i++) {
         const fixedIndex = i;
-        partialString.push('<label for="project-' + fixedIndex + '">[' + fixedIndex +
-        '<input type="checkbox" name="project" data-origin="injected" id="project-' + fixedIndex + '" />]</label>');
+        const elementSet = createProjectLabelCheckboxSet(fixedIndex);
+        checkboxFragment.appendChild(elementSet);
     }
-    const contentString = partialString.join("");
-    injectDocumentFragment(contentString, projectParent);
+    projectParent.appendChild(checkboxFragment);
     unitProjectList = document.querySelectorAll('input[type="checkbox"][name="project"][data-origin="injected"]');
     checkAllProjects.addEventListener("change", () => {
         projectMediator.setState(checkAllProjects.checked);
-    })
+    });
     unitProjectList.forEach((checkbox, index) => {
         checkbox.addEventListener("change", () => {
             projectMediator.setState(checkbox.checked, index);
@@ -207,17 +233,30 @@ function addProjectCheckbox() {
     });
 }
 
+function createExtensionLabelCheckboxSet(index) {
+    const labelElementWithInnerCheckbox = document.createElement("label");
+    labelElementWithInnerCheckbox.setAttribute("for", "extension-" + index);
+    const textNodeBegin = document.createTextNode("[" + FileExtensions[index]);
+    const checkboxElement = document.createElement("input");
+    checkboxElement.type = "checkbox";
+    checkboxElement.name = "extension";
+    checkboxElement.dataset.origin = "injected";
+    checkboxElement.id = "extension-" + index;
+    const textNodeEnd = document.createTextNode("]");
+    labelElementWithInnerCheckbox.appendChild(textNodeBegin);
+    labelElementWithInnerCheckbox.appendChild(checkboxElement);
+    labelElementWithInnerCheckbox.appendChild(textNodeEnd);
+    return labelElementWithInnerCheckbox;
+}
+
 function addExtensionCheckbox() {
-    const partialString = [];
+    const checkboxFragment = document.createDocumentFragment();
     for (let i = 0; i < FileExtensions.length; i++) {
         const fixedIndex = i;
-        partialString.push('<label for="extension-' + fixedIndex + '">['
-        + FileExtensions[i] +
-        '<input type="checkbox" name="extension" data-origin="injected" id="extension-'
-        + fixedIndex + '" />]</label>');
+        const elementSet = createExtensionLabelCheckboxSet(fixedIndex);
+        checkboxFragment.appendChild(elementSet);
     }
-    const contentString = partialString.join("");
-    injectDocumentFragment(contentString, extensionParent);
+    extensionParent.appendChild(checkboxFragment);
     unitExtensionList = document.querySelectorAll('input[type="checkbox"][name="extension"][data-origin="injected"]');
     checkAllExtensions.addEventListener("change", () => {
         extensionMediator.setState(checkAllExtensions.checked);
@@ -240,27 +279,11 @@ function collectOptions() {
     for (let i = 0; i < FileExtensions.length; i++) {
         const fixedIndex = i;
         extensionOptionBit |=
-        (unitExtensionList[fixedIndex].checked &&
-        !unitExtensionList[fixedIndex].disabled << fixedIndex);
+        ((unitExtensionList[fixedIndex].checked &&
+        !unitExtensionList[fixedIndex].disabled) << fixedIndex);
     }
 
     return { project: projectOptionBit, extension: extensionOptionBit };
-}
-
-function injectDocumentFragment(htmlString, parent) {
-    const template = document.createElement("template");
-    template.innerHTML = htmlString;
-    parent.appendChild(template.content);
-}
-
-function makeComboboxHTMLString(stringArray) {
-    const partialString = [];
-    partialString.push('<option value="" disabled selected hidden>...</option>');
-    for (let i = 0; i < stringArray.length; i++) {
-        partialString.push('<option value="' + stringArray[i] +'">' + stringArray[i] +"</option>");
-    }
-    const htmlString = partialString.join("");
-    return htmlString;
 }
 
 function addLocalizedMessage() {
@@ -311,8 +334,10 @@ async function onDOMLoaded() {
 document.addEventListener("DOMContentLoaded", onDOMLoaded);
 
 backupAllButtonElement.addEventListener("click", async () => {
+    const myTab = await chrome.tabs.query({ active: true, currentWindow: true });
     const response = await chrome.runtime.sendMessage({
         action: "backup",
+        tabId: myTab[0].id,
         option: { project: optionAllProject, extension: optionAllExtension }
     });
 
@@ -328,9 +353,6 @@ backupAllButtonElement.addEventListener("click", async () => {
     }
 });
 
-/**
- *
- */
 backupSelectionButtonElement.addEventListener("click", async () => {
     const options = collectOptions();
 
@@ -344,7 +366,13 @@ backupSelectionButtonElement.addEventListener("click", async () => {
         return;
     }
 
-    const response = await chrome.runtime.sendMessage({action: "backup", option: options });
+    const myTab = await chrome.tabs.query({ 
+        active: true, currentWindow: true });
+    const response = await chrome.runtime.sendMessage({
+        action: "backup", 
+        tabId: myTab[0].id,
+        option: options
+    });
 
     chrome.notifications.create({
         iconUrl: "icons/Extension128.png",
@@ -364,7 +392,11 @@ loadButtonElement.addEventListener("click", () => {
     const choice = backupCombobox.value;
     if (choice !== "") {
         (async () => {
-            const response = await chrome.runtime.sendMessage({ action: "load to browser", backupName: choice });
+            const myTab = await chrome.tabs.query({ active: true, currentWindow: true });
+            const response = await chrome.runtime.sendMessage({ 
+                action: "load to browser", 
+                tabId: myTab[0].id, 
+                backupName: choice });
             chrome.notifications.create({
                 iconUrl: "icons/Extension128.png",
                 title: chrome.i18n.getMessage("notificationTitle3"),

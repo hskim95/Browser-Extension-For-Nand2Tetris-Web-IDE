@@ -11,6 +11,7 @@
         "default_icon": {
             "16": "icons/Extension16.png",
             "32": "icons/Extension32.png",
+            "64": "icons/Extension64.png",
             "128": "icons/Extension128.png"
         },
         "default_title": "__MSG_title__",
