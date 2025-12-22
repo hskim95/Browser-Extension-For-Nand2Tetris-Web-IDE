@@ -6,16 +6,14 @@ This project is developed for learners using online version of **Nand to Tetris*
 
 
 ## 기능 (features)
-### 1.0.0
 * 브라우저에 저장된 유저가 작성한 소스 전체 또는 일부 백업 (확장앱 전용 스토리지에 저장)
-* 확장앱 또는 파일 형태의 백업 데이터를 브라우저로 불러오기
+* 확장앱 ~~또는 파일 형태~~의 백업 데이터를 브라우저로 불러오기
 * ~~유저가 작성한 소스 전체 또는 일부를 .sav 형식 파일로 저장~~ (다음 버전에 추가)
 
 ---
 
-### 1.0.0
 * Backup all/selected user-sources in browser local storage (will be saved in extension storage)
-* Load backup data to browser (from extension storage or binary file)
+* Load backup data to browser (from extension storage ~~or binary file~~)
 * ~~Save all/selected user-sources as a binary file(.sav)~~ (available in next version)
 
 
